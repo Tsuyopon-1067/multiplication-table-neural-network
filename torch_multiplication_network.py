@@ -5,11 +5,11 @@ from tqdm import tqdm
 
 class TorchMultiplicationNetwork:
     def __init__(self):
-        self.device = self.get_gpu()
+        self.device = self._get_device()
         model = self.create_model()
         
         # initialize model weights
-        for m in self.model.modules():
+        for m in model.modules():
             if isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
                 if m.bias is not None:
@@ -70,28 +70,27 @@ class TorchMultiplicationNetwork:
         for i in range(9):
             print(i+1, end=" ")
             for j in range(9):
-                input_i = torch.tensor([i+1, j+1], dtype=torch.float32).unsqueeze(0)
+                input_i = torch.tensor([i+1, j+1], dtype=torch.float32).unsqueeze(0).to(self.device)
                 output = self.model(input_i)
                 output_round = round(output.item(), 8)
                 output_str = str(output_round)[:5]
                 print(output_str, end=" ")
             print()
 
-    def get_gpu(self, use_gpu=True):
+    def _get_device(self, use_gpu=True):
         if not use_gpu:
-            device = torch.device('cpu')
             print("Using CPU")
-            return device
+            return torch.device('cpu')
+
         if torch.cuda.is_available():
-            device = torch.device('cuda')
             print("Using CUDA")
+            return torch.device('cuda')
         elif torch.backends.mps.is_available():
-            device = torch.device('mps')
             print("Using MPS")
+            return torch.device('mps')
         else:
-            device = torch.device('cpu')
             print("Using CPU")
-        return device
+            return torch.device('cpu')
 
     def create_training_data(self):
         input_data = [(a+1, b+1) for a in range(9) for b in range(9)]
