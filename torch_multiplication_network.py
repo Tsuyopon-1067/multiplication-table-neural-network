@@ -6,7 +6,7 @@ from tqdm import tqdm
 class TorchMultiplicationNetwork:
     def __init__(self, batch_size):
         self.batch_size = batch_size
-        self.device = self._get_device()
+        self.device = self._get_device(False)
         model = self.create_model()
         
         # initialize model weights
@@ -21,14 +21,18 @@ class TorchMultiplicationNetwork:
 
     def create_model(self):
         model = nn.Sequential(
-            nn.Linear(2, 32),
+            nn.Linear(2, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 32),
             nn.ReLU(),
             nn.Linear(32, 1)
         )
         return model
     
     def create_optimizer(self, model):
-        optimizer = optim.Adam(model.parameters(), lr=0.00002)
+        optimizer = optim.Adam(model.parameters(), lr=0.0001)
         criterion = nn.MSELoss()
         return optimizer, criterion
 
