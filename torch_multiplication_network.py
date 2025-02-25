@@ -62,7 +62,7 @@ class TorchMultiplicationNetwork:
             'loss': loss,
         }, path)
 
-    def test_model(self):
+    def test(self):
         print("      ", end="")
         for j in range(9):
             print(j+1, end="     ")
