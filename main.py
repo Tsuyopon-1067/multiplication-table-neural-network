@@ -1,8 +1,8 @@
 from torch_multiplication_network import TorchMultiplicationNetwork
 
 def main():
-    epoch = 10
-    network = TorchMultiplicationNetwork()
+    epoch = 1000
+    network = TorchMultiplicationNetwork(256)
     input_data, output_data = network.create_training_data()
     network.train(input_data, output_data, epoch)
     network.test()

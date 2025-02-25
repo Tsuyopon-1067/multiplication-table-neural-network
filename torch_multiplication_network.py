@@ -4,7 +4,8 @@ import torch.optim as optim
 from tqdm import tqdm
 
 class TorchMultiplicationNetwork:
-    def __init__(self):
+    def __init__(self, batch_size):
+        self.batch_size = batch_size
         self.device = self._get_device()
         model = self.create_model()
         
@@ -33,23 +34,28 @@ class TorchMultiplicationNetwork:
 
     def train(self, input_data, target, epoch):
         all_loss = 0
+        dataset_size = len(input_data)
         
         for e in tqdm(range(epoch)):
             epoch_loss = 0
-            for i in range(len(input_data)):
+            indices = torch.randperm(dataset_size)
+
+            for start_idx in range(0, dataset_size, self.batch_size):
+                batch_indices = indices[start_idx:min(start_idx + self.batch_size, dataset_size)]
+                batch_input = input_data[batch_indices]
+                batch_target = target[batch_indices]
+
                 self.optimizer.zero_grad()
 
-                input_i = torch.unsqueeze(input_data[i], 0)
-                output_i = self.model(input_i)
-                target_i = torch.unsqueeze(target[i], 0)
+                outputs = self.model(batch_input)
+                loss = self.criterion(outputs, batch_target)
 
-                loss = self.criterion(output_i, target_i)
                 loss.backward()
                 self.optimizer.step()
-                epoch_loss += loss.item()
+                epoch_loss += loss.item() * len(batch_indices)
 
-            epoch_loss /= len(input_data)
-            all_loss += epoch_loss
+            avg_epoch_loss = epoch_loss / dataset_size
+            all_loss += avg_epoch_loss
             if (e + 1) % 100 == 0:
                 print(f"Epoch [{e+1}/{epoch}], Loss: {epoch_loss/len(input_data):.4f}")
         return all_loss/epoch
